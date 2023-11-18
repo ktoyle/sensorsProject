@@ -43,7 +43,7 @@ Servo mySecondServo; //defines 1st servo variable name
 
 ///Sonic range sensor variable set up/////////////////////////////////////////////////////////////
 float duration, distance_cm, distance_inch;// distance for the ultrasonic sensor
-
+int prevDistance;
 /// start button variable set up//////////////////////////////////////////////////////
 int buttonVal;// define val of button
 
@@ -115,11 +115,11 @@ void setup() {
 void LEDs(int LED_switch){
 
   if (LED_switch == 1){
-    digitalWrite(greenledpin, LOW);
-    digitalWrite(redledpin, HIGH);
-  } else{
-    digitalWrite(redledpin, LOW);
     digitalWrite(greenledpin, HIGH);
+    digitalWrite(redledpin, LOW);
+  } else{
+    digitalWrite(redledpin, HIGH);
+    digitalWrite(greenledpin, LOW);
   }
 
 }
@@ -145,8 +145,6 @@ void buzzer_noise(int noiseMode){
 
 void Ultrasonic() {
 
-if(greenLight = 0){
-
   digitalWrite(trigPin, LOW);
   delayMicroseconds(5);
   digitalWrite(trigPin, HIGH);
@@ -155,11 +153,22 @@ if(greenLight = 0){
 
   duration = pulseIn(echoPin, HIGH);
 
+
   distance_cm = (duration) / 58.2;
+
+  if(distance_cm > (prevDistance + 10) || distance_cm < (prevDistance -10 )){
+    gameStart = 0;
+  }
+
+
   Serial.print("Distance: ");
   Serial.print(distance_cm);
   Serial.println(" cm");
-}
+
+  prevDistance = distance_cm;
+
+  
+
 }
 
 void LCD_screen(){
@@ -190,8 +199,8 @@ void servo1(int servoMode) {
 
     myFirstServo.write(servoMode);
   
-     Serial.print("Servo1 Angle ");
-     Serial.println(currentAngle);
+    // Serial.print("Servo1 Angle ");
+     //Serial.println(currentAngle);
 
 
 }
@@ -226,11 +235,10 @@ ISR(TIMER1_COMPA_vect){// interrupt game clock countdown (pin 19)  button
 
   if(servoState==0){ //redlight phase where ultrasonic sensor faces player
 
-     //Ultrasonic();
 
       if(servoTime ==3){
-        greenLight = 0;
-        //toggleServo = 1;
+        greenLight = 1;
+  
         servoState = 180;// angle after 3 sec go back to greenlight
 
 
@@ -243,9 +251,7 @@ ISR(TIMER1_COMPA_vect){// interrupt game clock countdown (pin 19)  button
      
 
       if (servoTime == 2){
-           greenLight = 1;
-        // toggleServo = 1;
-
+           greenLight = 0;
 
 
         servoState = 0; //angle after 2 sec go back to redlight
@@ -261,18 +267,29 @@ ISR(TIMER1_COMPA_vect){// interrupt game clock countdown (pin 19)  button
 
 void loop() {
 
+   Serial.print("GAME START: ");
+  Serial.println(gameStart);
+
+ if(gameStart == 1){ 
+
     LEDs(greenLight);
     servo1(servoState);
     buzzer_noise(greenLight);
 
+  if(greenLight == 0){
+    
+  Ultrasonic();
+}
+ 
+//Serial.println(servoTime);
+ }
+ else{
 
-Serial.println(servoTime);
-
-
-
-
-
+  digitalWrite(redledpin, LOW);
+  digitalWrite(greenledpin, LOW);
+  digitalWrite(buzzerPin, LOW); // Turn the buzzer off
   
+ }
 
 
 }
