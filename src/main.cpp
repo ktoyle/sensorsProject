@@ -39,7 +39,7 @@ Servo myFirstServo; //defines 1st servo variable name
 int secondMotorAngle;
 int secondServoVal;// define val for 1st servo motor 
 int secondServoAngle; //define val that holds angle for 1st servo motor
-Servo mySecondServo; //defines 1st servo variable name
+Servo mySecondServo; //defines 2nd servo variable name
 
 ///Sonic range sensor variable set up/////////////////////////////////////////////////////////////
 float duration, distance_cm, distance_inch;// distance for the ultrasonic sensor
@@ -84,7 +84,7 @@ void setup() {
 
   sei();
 
-
+  //mySecondServo.write(0);
   
 
     Serial.begin(9600);// set baud rate at 9600
@@ -219,20 +219,22 @@ void servo1(int servoMode) {
 
 
 }
-/*
+
 void servo2(int winMode) {
 
 
-  int currentAngle = mySecondServo.read(); // myservo1.read(); 
+  //int currentAngle = mySecondServo.read(); // myservo1.read(); 
 
    mySecondServo.write(winMode);
+   Serial.print("2ND ANGLE: ");
+   Serial.println(mySecondServo.read());
   
     // Serial.print("Servo2 Angle ");
     // Serial.println(currentAngle);
 
 
 }
-*/
+
 
 ISR(TIMER1_COMPA_vect){// interrupt game clock countdown (pin 19)  button
 
@@ -285,9 +287,14 @@ void loop() {
 
   // Serial.print("GAME START: ");
   //Serial.println(gameStart);
+  
+  Serial.print("2ND SERVO: ");
+  Serial.println(mySecondServo.read());
 
  if(gameStart == 1){ 
 
+
+    servo2(0);
     timeLeft = 60;
 
     servo1(servoState);
@@ -305,6 +312,7 @@ void loop() {
  }
  else{
 
+  servo2(180);
   digitalWrite(redledpin, LOW);
   digitalWrite(greenledpin, LOW);
   digitalWrite(buzzerPin, LOW); // Turn the buzzer off
