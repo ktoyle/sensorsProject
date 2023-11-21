@@ -51,6 +51,7 @@ int buttonVal;// define val of button
 
 int greenLight = 0;
 int gameStart = 0;
+int loseMode = 0;
 volatile int timeLeft = 60;
 
 
@@ -62,6 +63,8 @@ volatile int servoState = 0;
 void INT0_ISR(){ //interrupt for start of game (pin 18) button
 
   gameStart = 1;
+  loseMode = 0;
+
 	
 
 }
@@ -172,7 +175,7 @@ void Ultrasonic() {
 
     if(distance_cm > (prevDistance + 10) || distance_cm < (prevDistance -10 )){
     
-      gameStart = 0;
+      loseMode  = 1;
     }
   }
 
@@ -291,7 +294,9 @@ void loop() {
   Serial.print("2ND SERVO: ");
   Serial.println(mySecondServo.read());
 
- if(gameStart == 1){ 
+if (gameStart == 1){
+
+ if(loseMode== 0){ 
 
 
     servo2(0);
@@ -318,6 +323,20 @@ void loop() {
   digitalWrite(buzzerPin, LOW); // Turn the buzzer off
   
  }
+ 
+
+
+ }
+ else{
+
+  servo2(0);
+  digitalWrite(redledpin, LOW);
+  digitalWrite(greenledpin, LOW);
+  digitalWrite(buzzerPin, LOW); // Turn the buzzer off
+
+ 
+}
+
 
 
 }
