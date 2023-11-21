@@ -51,7 +51,7 @@ int buttonVal;// define val of button
 
 int greenLight = 0;
 int gameStart = 0;
-int gameTime = 60;
+volatile int timeLeft = 60;
 
 
 volatile int toggleServo = 0;
@@ -120,6 +120,8 @@ void LEDs(int LED_switch){
   } else{
     digitalWrite(redledpin, HIGH);
     digitalWrite(greenledpin, LOW);
+
+    
   }
 
 }
@@ -156,14 +158,24 @@ void Ultrasonic() {
 
   distance_cm = (duration) / 58.2;
 
-  if(distance_cm > (prevDistance + 10) || distance_cm < (prevDistance -10 )){
-    gameStart = 0;
-  }
-
 
   Serial.print("Distance: ");
   Serial.print(distance_cm);
   Serial.println(" cm");
+
+  Serial.print("Sensing Angle: ");
+  Serial.println(myFirstServo.read());
+
+  if(myFirstServo.read() == 0){
+
+    delay(300); 
+
+    if(distance_cm > (prevDistance + 10) || distance_cm < (prevDistance -10 )){
+    
+      gameStart = 0;
+    }
+  }
+
 
   prevDistance = distance_cm;
 
@@ -182,7 +194,7 @@ void LCD_screen(){
   //   lcd.print(" Seconds");
   // }
 
-  // if (timeLeft <= -1){
+  // if (timeLeft == 0){
   //   lcd.setCursor(0, 0);
   //   lcd.print("      Game      ");
   //   lcd.setCursor(0, 1);
@@ -195,11 +207,14 @@ void LCD_screen(){
 void servo1(int servoMode) {
 
 
-  int currentAngle = myFirstServo.read(); // myservo1.read(); 
+  int currentAngle = myFirstServo.read(); // myservo1.read();
+
+  Serial.print("Current Angle: ");
+  Serial.println(currentAngle); 
 
     myFirstServo.write(servoMode);
   
-    // Serial.print("Servo1 Angle ");
+     //Serial.print("Servo1 Angle ");
      //Serial.println(currentAngle);
 
 
@@ -223,11 +238,11 @@ ISR(TIMER1_COMPA_vect){// interrupt game clock countdown (pin 19)  button
 
  
 
-  if(gameTime == 0){
-    gameTime = 0;
+  if(timeLeft == 0){
+    timeLeft = 0;
   }
   else{
-     gameTime --;
+     timeLeft --;
   }
 
   servoTime++;
@@ -243,6 +258,7 @@ ISR(TIMER1_COMPA_vect){// interrupt game clock countdown (pin 19)  button
 
 
         servoTime = 0;
+
 
       }
   }
@@ -267,17 +283,21 @@ ISR(TIMER1_COMPA_vect){// interrupt game clock countdown (pin 19)  button
 
 void loop() {
 
-   Serial.print("GAME START: ");
-  Serial.println(gameStart);
+  // Serial.print("GAME START: ");
+  //Serial.println(gameStart);
 
  if(gameStart == 1){ 
 
-    LEDs(greenLight);
+    timeLeft = 60;
+
     servo1(servoState);
+    LEDs(greenLight);
     buzzer_noise(greenLight);
 
   if(greenLight == 0){
-    
+
+
+  //delay(200);  
   Ultrasonic();
 }
  
