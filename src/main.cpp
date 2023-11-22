@@ -49,7 +49,7 @@ int buttonVal;// define val of button
 
 ///game variable setup//////////////////////////////////////////////////////////////
 
-int greenLight = 0;
+int greenLight = 1;
 int gameStart = 0;
 int loseMode = 0;
 volatile int timeLeft = 60;
@@ -166,21 +166,29 @@ void Ultrasonic() {
   Serial.print(distance_cm);
   Serial.println(" cm");
 
-  Serial.print("Sensing Angle: ");
-  Serial.println(myFirstServo.read());
+  //Serial.print("Sensing Angle: ");
+  //Serial.println(myFirstServo.read());
 
   if(myFirstServo.read() == 0){
 
-    delay(300); 
+   // delay(300); 
+
+    
 
     if(distance_cm > (prevDistance + 10) || distance_cm < (prevDistance -10 )){
     
       loseMode  = 1;
     }
+
+    prevDistance = distance_cm;
+
+     Serial.print("PREVIOUS Distance: ");
+    Serial.println(prevDistance);
+     
   }
 
 
-  prevDistance = distance_cm;
+ // prevDistance = distance_cm;
 
   
 
@@ -212,13 +220,13 @@ void servo1(int servoMode) {
 
   int currentAngle = myFirstServo.read(); // myservo1.read();
 
-  Serial.print("Current Angle: ");
-  Serial.println(currentAngle); 
+  //Serial.print("Current Angle: ");
+  //Serial.println(currentAngle); 
 
     myFirstServo.write(servoMode);
   
      //Serial.print("Servo1 Angle ");
-     //Serial.println(currentAngle);
+    // Serial.println(currentAngle);
 
 
 }
@@ -229,8 +237,8 @@ void servo2(int winMode) {
   //int currentAngle = mySecondServo.read(); // myservo1.read(); 
 
    mySecondServo.write(winMode);
-   Serial.print("2ND ANGLE: ");
-   Serial.println(mySecondServo.read());
+   //Serial.print("2ND ANGLE: ");
+   //Serial.println(mySecondServo.read());
   
     // Serial.print("Servo2 Angle ");
     // Serial.println(currentAngle);
@@ -291,44 +299,42 @@ void loop() {
   // Serial.print("GAME START: ");
   //Serial.println(gameStart);
   
-  Serial.print("2ND SERVO: ");
-  Serial.println(mySecondServo.read());
+  //Serial.print("2ND SERVO: ");
+ // Serial.println(mySecondServo.read());
 
-if (gameStart == 1){
+  if (gameStart == 1){
 
- if(loseMode== 0){ 
-
-
-    servo2(0);
-    timeLeft = 60;
-
-    servo1(servoState);
-    LEDs(greenLight);
-    buzzer_noise(greenLight);
-
-  if(greenLight == 0){
+      if(loseMode== 0){ 
 
 
-  //delay(200);  
-  Ultrasonic();
-}
+       // servo2(0);
+        timeLeft = 60;
+
+        servo1(servoState);
+        LEDs(greenLight);
+        buzzer_noise(greenLight);
+
+        if(greenLight == 0){
+
+
+        delay(300);  
+        Ultrasonic();
+        }
  
 //Serial.println(servoTime);
- }
- else{
+      }
+    else{
 
-  servo2(180);
-  digitalWrite(redledpin, LOW);
-  digitalWrite(greenledpin, LOW);
-  digitalWrite(buzzerPin, LOW); // Turn the buzzer off
+   // servo2(180);
+    digitalWrite(redledpin, LOW);
+    digitalWrite(greenledpin, LOW);
+    digitalWrite(buzzerPin, LOW); // Turn the buzzer off
   
- }
- 
-
-
- }
+  }
+  }
  else{
 
+  
   servo2(0);
   digitalWrite(redledpin, LOW);
   digitalWrite(greenledpin, LOW);
@@ -336,7 +342,5 @@ if (gameStart == 1){
 
  
 }
-
-
 
 }
