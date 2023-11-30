@@ -64,19 +64,19 @@ volatile int servoState = 0;
 int ultrasonicFirstReading = 1;
 
 
-//testing
-int counter=0;
-
 void INT0_ISR(){ //interrupt for start of game (pin 18) button
 
   timeLeft = 60;
   gameStart = 1;
   loseMode = 0;
   winMode = 0;
-  servoState = 180;            //0-redlight, 180-greenlight
+  servoState = 180; //0-redlight, 180-greenlight
   greenLight = 1;
   servoTime = 0;
   int ultrasonicFirstReading = 1;
+  greenTime = random(2,5); //initialize random green time duration
+  redTime = random(2, 5);
+ 
 	
 
 }
@@ -99,9 +99,6 @@ void setup() {
 
   sei();
 
-  //mySecondServo.write(0);
-  
-
     Serial.begin(9600);// set baud rate at 9600
 
     lcd.begin(16, 2); // set up the LCD's number of columns and rows:
@@ -121,12 +118,7 @@ void setup() {
 
   attachInterrupt(digitalPinToInterrupt(buttonpin), INT0_ISR, RISING);
 
-  greenTime = random(2,5); //initialize random green time duration
-  redTime = random(2, 5);
 }
-
-
-
 
 
 void LEDs(int LED_switch){
@@ -145,14 +137,10 @@ void LEDs(int LED_switch){
 
 void buzzer_noise(int noiseMode){
 
-
-
     if(noiseMode == 1){
 
       tone(buzzerPin, 2000);
     
-    
-
     }
      else{
 
@@ -180,21 +168,16 @@ void Ultrasonic() {
   Serial.print(distance_cm);
   Serial.println(" cm");
 
-  //Serial.print("Sensing Angle: ");
-  //Serial.println(myFirstServo.read());
-
   if(myFirstServo.read() == 0){
+
     if (ultrasonicFirstReading == 1){
       ultrasonicFirstReading = 0;
       prevDistance = distance_cm;
     }
     else{
 
-   // delay(300); 
 
-    
-
-      if(distance_cm > (prevDistance + 5) || distance_cm < (prevDistance -5 )){
+      if(distance_cm > (prevDistance + 2) || distance_cm < (prevDistance -2 )){
         Serial.println("You lost!");
          loseMode  = 1;
       }
@@ -203,17 +186,12 @@ void Ultrasonic() {
         winMode = 1;
       }
 
-      prevDistance = distance_cm;
+       prevDistance = distance_cm;
 
       Serial.print("PREVIOUS Distance: ");
       Serial.println(prevDistance);
     }
   }
-
-
- // prevDistance = distance_cm;
-
-  
 
 }
 
@@ -248,22 +226,11 @@ void servo1(int servoMode) {
 
 
   int currentAngle = myFirstServo.read(); // myservo1.read();
-
-  //Serial.print("Current Angle: ");
-  //Serial.println(currentAngle); 
-
-    myFirstServo.write(servoMode);
-  
-     //Serial.print("Servo1 Angle ");
-    // Serial.println(currentAngle);
-
+  myFirstServo.write(servoMode);
 
 }
 
 void servo2(int loseMode) {
-
-
-  //int currentAngle = mySecondServo.read(); // myservo1.read(); 
 
   if(loseMode == 0 || winMode ==1){
    mySecondServo.write(0);
@@ -271,25 +238,11 @@ void servo2(int loseMode) {
   else{
     mySecondServo.write(180);
   }
-   //Serial.print("2ND ANGLE: ");
-   //Serial.println(mySecondServo.read());
-  
-    // Serial.print("Servo2 Angle ");
-    // Serial.println(currentAngle);
-
 
 }
 
 
 ISR(TIMER1_COMPA_vect){// interrupt game clock countdown (pin 19)  button
-  // counter++;
-  // Serial.print("Seconds: ");
-  // Serial.println(counter);
-
-  // Serial.print("Time left: ");
-  // Serial.println(timeLeft);
- 
-
 
   if(timeLeft == 0){
     timeLeft = 0;
@@ -323,6 +276,8 @@ ISR(TIMER1_COMPA_vect){// interrupt game clock countdown (pin 19)  button
       if (servoTime == redTime){
            greenLight = 0;
 
+           ultrasonicFirstReading = 1;
+
 
         servoState = 0; //angle after 2 sec go back to redlight
         servoTime = 0;
@@ -338,11 +293,6 @@ ISR(TIMER1_COMPA_vect){// interrupt game clock countdown (pin 19)  button
 
 void loop() {
 
-  // Serial.print("GAME START: ");
-  //Serial.println(gameStart);
-  
-  //Serial.print("2ND SERVO: ");
- // Serial.println(mySecondServo.read());
 
   if (gameStart == 1){
 
@@ -351,10 +301,6 @@ void loop() {
     LCD_screen();
 
       if(loseMode== 0 && winMode == 0){ 
-
-
-       // servo2(0);
-        //timeLeft = 60;
 
         servo1(servoState);
         LEDs(greenLight);
@@ -367,7 +313,6 @@ void loop() {
         Ultrasonic();
         }
  
-//Serial.println(servoTime);
       }
     else{
    
